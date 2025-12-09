@@ -37,11 +37,12 @@ app.use(cookieParser())
 
 /// Import router
 import { ApiError } from "./utils/ApiError.js";
-import userRouter from './routes/user.routes.js'
+import userRouter from "./routes/user.routes.js"
+import videoRouter from "./routes/video.routes.js"
 
 /// route declare
 app.use("/api/v1/users", userRouter)
-
+app.use("/api/v1/video", videoRouter)
 
 
 
