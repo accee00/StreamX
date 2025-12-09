@@ -1,20 +1,31 @@
 import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
-const commentSchema = new Schema({
-    content: {
-        type: String,
-    },
-    video: {
-        type: Schema.Types.ObjectId,
-        ref: "Video"
-    },
-    owner: {
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    }
-}, { timestamps: true })
 
-/// this plugin is used for pagination. for eg instead of fetching 1000 comment we will fetch only 15 
-commentSchema.plugin(mongooseAggregatePaginate)
+const commentSchema = new Schema(
+    {
+        content: {
+            type: String,
+            required: true,
+        },
+        owner: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        targetModel: {
+            type: String,
+            required: true,
+            enum: ["Video", "Tweet"],
+        },
+        target: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            refPath: "targetModel",
+        },
+    },
+    { timestamps: true }
+);
 
-export const Comment = mongoose.model("Comment", commentSchema)
+commentSchema.plugin(mongooseAggregatePaginate);
+
+export const Comment = mongoose.model("Comment", commentSchema);
