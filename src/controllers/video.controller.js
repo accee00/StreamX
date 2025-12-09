@@ -315,10 +315,65 @@ const updateVideo = asyncHandler(async (req, res) => {
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: delete video
+    if (!videoId) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Video id is missing.",
+        });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid video id.",
+        });
+    }
+    /// delete thumbnail and video from cloudinary too.
+    const video = await Video.findById(videoId)
+
+    await deleteOnCloudinary(video.thumbnail)
+
+    await deleteOnCloudinary(video.videoFile, true)
+
+    const deleteVideo = await Video.findByIdAndDelete(videoId)
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Video deleted success.",
+            data: deleteVideo,
+        })
+    )
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-})
-export { getAllVideos, publishAVideo, getVideoById, updateVideo };
+    const { videoId } = req.params;
+
+    if (!videoId) {
+        throw new ApiError({ statusCode: 400, message: "Video id is missing." });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError({ statusCode: 400, message: "Invalid video id." });
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        { $bit: { isPublished: { xor: 1 } } },
+        { new: true }
+    );
+
+    if (!updatedVideo) {
+        throw new ApiError({ statusCode: 404, message: "Video not found." });
+    }
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Publish status toggled successfully.",
+            data: updatedVideo,
+        })
+    );
+});
+
+export { getAllVideos, publishAVideo, getVideoById, updateVideo, deleteVideo, togglePublishStatus };

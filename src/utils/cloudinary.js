@@ -39,25 +39,27 @@ function getPublicIdFromUrl(url) {
     }
     return null;
 }
-const deleteOnCloudinary = async (imageUrlOrPublicId) => {
+const deleteOnCloudinary = async (publicIdOrUrl, isVideo = false) => {
     try {
-        if (!imageUrlOrPublicId) return null;
+        if (!publicIdOrUrl) return null;
 
-        const publicId = getPublicIdFromUrl(imageUrlOrPublicId)
+        const publicId = getPublicIdFromUrl(publicIdOrUrl);
+
         const response = await cloudinary.uploader.destroy(publicId, {
-            resource_type: "image",
+            resource_type: isVideo ? "video" : "image",
         });
 
         if (response.result === "ok") {
             console.log("Deleted successfully");
-            return true
+            return true;
         } else {
             console.log("Delete failed or file not found:", response.result);
-            return false
+            return false;
         }
-    } catch (e) {
-        console.error("Cloudinary Delete Error:", e);
+    } catch (error) {
+        console.error("Cloudinary Delete Error:", error);
         return null;
     }
 };
+
 export { uploadOnCloudinary, deleteOnCloudinary }
