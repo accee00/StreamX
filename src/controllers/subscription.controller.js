@@ -39,9 +39,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
             subscriber: userId,
             channelId: channelId,
         })
-        return res.status(200).json(
+        return res.status(201).json(
             new ApiResponse({
-                statusCode: 200,
+                statusCode: 201,
                 data: subscribed,
                 message: "Channel subscribed successfully."
             })
@@ -116,7 +116,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     const subscribedChannels = await Subscription.aggregate([
         {
             $match: {
-                subscriber: new mongoose.Types.ObjectId(subscriberId),
+                subscriber: new mongoose.Types.ObjectId(String(subscriberId)),
             },
         },
         {

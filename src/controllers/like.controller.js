@@ -30,9 +30,9 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
             video: videoId,
             likedBy: req.user?._id,
         })
-        return res.status(200).json(
+        return res.status(201).json(
             new ApiResponse({
-                statusCode: 200,
+                statusCode: 201,
                 message: "Video liked successfully.",
                 data: like,
             })
