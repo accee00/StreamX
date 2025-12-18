@@ -4,19 +4,19 @@ import {
     toggleCommentLike,
     toggleTweetLike,
     toggleVideoLike,
-    getLikedVideos
+    getLikedVideos,
 } from "../controllers/like.controller.js";
 
 const router = Router();
 
 router.use(verifyJWT);
 
-router.patch("/videos/:videoId/like", toggleVideoLike);
+router.route("/videos/:videoId").patch(toggleVideoLike);
 
-router.patch("/tweets/:tweetId/like", toggleTweetLike);
+router.route("/tweets/:tweetId").patch(toggleTweetLike);
 
-router.patch("/comments/:commentId/like", toggleCommentLike);
+router.route("/comments/:commentId").patch(toggleCommentLike);
 
-router.get("/videos", getLikedVideos);
+router.route("/videos").get(getLikedVideos);
 
 export default router;
