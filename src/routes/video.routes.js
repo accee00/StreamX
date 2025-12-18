@@ -21,15 +21,15 @@ router.route("/publish-video").post(
     ]),
     publishAVideo,
 )
-router.route("/video/update-video/:videoId").patch(verifyJWT, upload.single("thumbnail"), updateVideo)
+router.route("/update-video/:videoId").patch(verifyJWT, upload.single("thumbnail"), updateVideo)
 
 router
-    .route("/video/:videoId")
+    .route("/:videoId")
     .get(verifyJWT, getVideoById)
     .delete(verifyJWT, deleteVideo);
 
 router
-    .route("/video/:videoId/publish")
+    .route("/:videoId/publish")
     .patch(verifyJWT, togglePublishStatus);
 
 export default router

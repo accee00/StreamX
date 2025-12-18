@@ -14,8 +14,8 @@ const getAllVideos = asyncHandler(async (req, res) => {
         sortType = "desc",
     } = req.query;
 
-    const pageNumber = parseInt(page, 10);
-    const limitNumber = parseInt(limit, 10);
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
     const sortDirection = sortType === "asc" ? 1 : -1;
 
     const aggregatePipeline = [];
@@ -154,18 +154,13 @@ const getVideoById = asyncHandler(async (req, res) => {
             message: "Invalid video id.",
         });
     }
-    await Video.findByIdAndUpdate(
-        videoId,
-        { $inc: { views: 1 } },
-        { new: true }
-    );
 
     const userId = req.user?._id;
 
     const pipeline = [
         {
             $match: {
-                _id: new mongoose.Types.ObjectId.createFromHexString(videoId),
+                _id: new mongoose.Types.ObjectId(String(videoId)),
             },
         },
         {
@@ -257,6 +252,11 @@ const getVideoById = asyncHandler(async (req, res) => {
             message: "Video not found.",
         });
     }
+    await Video.findByIdAndUpdate(
+        videoId,
+        { $inc: { views: 1 } },
+        { new: true }
+    );
 
     return res.status(200).json(
         new ApiResponse({
@@ -359,9 +359,16 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
     const updatedVideo = await Video.findByIdAndUpdate(
         videoId,
-        { $bit: { isPublished: { xor: 1 } } },
+        [
+            {
+                $set: {
+                    isPublished: { $not: "$isPublished" }
+                }
+            }
+        ],
         { new: true }
     );
+
 
     if (!updatedVideo) {
         throw new ApiError({ statusCode: 404, message: "Video not found." });

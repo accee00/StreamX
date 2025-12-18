@@ -1,14 +1,141 @@
 import { Tweet } from "../models/tweet.model.js"
-import { Video } from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { Comment } from "../models/comment.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { ApiError } from "../utils/ApiError.js"
+import mongoose from "mongoose"
+
 const getVideoComments = asyncHandler(async (req, res) => {
-    //TODO: get all comments for a video
     const { videoId } = req.params
     const { page = 1, limit = 10 } = req.query
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
 
+    if (!videoId) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Video id is required."
+        })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid video id",
+        });
+    }
+
+    const aggregate = Comment.aggregate([
+        {
+            $match: {
+                target: new mongoose.Types.ObjectId(String(videoId)),
+                targetModel: "Video",
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+            },
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $project: {
+                _id: 1,
+                content: 1,
+                createdAt: 1,
+                "owner._id": 1,
+                "owner.userName": 1,
+                "owner.fullName": 1,
+                "owner.avatar": 1,
+            },
+        },
+        { $sort: { createdAt: -1 } },
+    ]);
+
+    const result = await Comment.aggregatePaginate(aggregate, {
+        page: pageNumber,
+        limit: limitNumber,
+    });
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            message: "Video comments fetched successfully",
+            data: result,
+        })
+    );
+})
+
+const getTweetComments = asyncHandler(async (req, res) => {
+    const { tweetId } = req.params
+    const { page = 1, limit = 10 } = req.query
+
+    const pageNumber = Number(page)
+    const limitNumber = Number(limit)
+
+    if (!tweetId) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Tweet id is required."
+        })
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+        throw new ApiError({
+            statusCode: 400,
+            message: "Invalid tweet id",
+        });
+    }
+
+    const aggregate = Comment.aggregate([
+        {
+            $match: {
+                target: new mongoose.Types.ObjectId(String(tweetId)),
+                targetModel: "Tweet",
+            },
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+            }
+        },
+        {
+            $unwind: "$owner"
+        },
+        {
+            $project: {
+                _id: 1,
+                content: 1,
+                createdAt: 1,
+                "owner._id": 1,
+                "owner.userName": 1,
+                "owner.fullName": 1,
+                "owner.avatar": 1,
+            }
+        },
+        { $sort: { createdAt: -1 } }
+    ])
+
+    const result = await Comment.aggregatePaginate(aggregate, {
+        page: pageNumber,
+        limit: limitNumber,
+    })
+
+    return res.status(200).json(
+        new ApiResponse({
+            statusCode: 200,
+            data: result,
+            message: "Tweet comments fetched successfully."
+        })
+    )
 })
 
 const addComment = asyncHandler(async (req, res) => {
@@ -166,5 +293,6 @@ export {
     getVideoComments,
     addComment,
     updateComment,
-    deleteComment
+    deleteComment,
+    getTweetComments
 }
