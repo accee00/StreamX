@@ -110,7 +110,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
         });
     }
 
-    const videoUpload = await uploadOnCloudinary(videoLocalPath);
+    const videoUpload = await uploadOnCloudinary(videoLocalPath, true);
     const thumbnailUpload = await uploadOnCloudinary(thumbnailLocalPath);
 
     if (!videoUpload || !thumbnailUpload) {

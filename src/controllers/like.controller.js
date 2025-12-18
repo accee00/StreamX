@@ -1,8 +1,8 @@
 import mongoose from "mongoose"
-import { ApiError } from "../utils/ApiError"
+import { ApiError } from "../utils/ApiError.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { Like } from "../models/like.model.js"
-import { ApiResponse } from "../utils/ApiResponse"
+import { ApiResponse } from "../utils/ApiResponse.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params

@@ -2,8 +2,8 @@ import { Tweet } from "../models/tweet.model.js"
 import { Video } from "../models/video.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { Comment } from "../models/comment.model.js"
-import { ApiResponse } from "../utils/ApiResponse"
-import { ApiError } from "../utils/ApiError"
+import { ApiResponse } from "../utils/ApiResponse.js"
+import { ApiError } from "../utils/ApiError.js"
 const getVideoComments = asyncHandler(async (req, res) => {
     //TODO: get all comments for a video
     const { videoId } = req.params

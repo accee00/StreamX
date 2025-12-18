@@ -433,12 +433,12 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
-                _id: new mongoose.Types.ObjectId.createFromHexString(req.user?._id)
+                _id: req.user._id
             }
         },
         {
             $lookup: {
-                from: "video",
+                from: "videos",
                 localField: "watchHistory",
                 foreignField: "_id",
                 as: "watchHistory",
@@ -457,34 +457,34 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                                         userName: 1,
                                         avatar: 1,
                                     }
-                                },
+                                }
                             ]
-                        },
+                        }
                     },
                     {
                         $addFields: {
-                            owner: {
-                                $first: "$owner"
-                            }
+                            owner: { $first: "$owner" }
                         }
                     }
                 ]
             }
         }
-    ])
+    ]);
 
-    if (!user?.length) {
+    if (!user.length) {
         throw new ApiError({
-            statusCode: 400,
-            message: "Channel does not exist."
-        })
+            statusCode: 404,
+            message: "User does not exist."
+        });
     }
+
     return res.status(200).json(
         new ApiResponse({
             statusCode: 200,
             message: "Watch history fetch success.",
             data: user[0].watchHistory
         })
-    )
-})
+    );
+});
+
 export { registerUser, logInUser, logOutUser, refreshAccessTokens, changePassword, getCurrentUser, updateUserAvatar, updateAccountDetail, updateUserProfile, getUserChannelProfile, getWatchHistory };

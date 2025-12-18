@@ -12,13 +12,13 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (filePath) => {
+const uploadOnCloudinary = async (filePath, isVideo = false) => {
     try {
         if (!filePath) return null
 
         /// upload file
         const response = await cloudinary.uploader.upload(filePath, {
-            resource_type: "auto"
+            resource_type: isVideo ? "video" : "auto"
         })
 
         console.log(`File uploaded on cloudinary: ${response.url}`)
